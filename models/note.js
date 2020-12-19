@@ -1,17 +1,17 @@
 const mongoose = require('mongoose')
 
 const noteSchema = new mongoose.Schema({
+  title: String,
   content: {
     type: String,
-    required: true,
-    minlength: 5
   },
-  date: Date,
-  important: Boolean,
+  createdDate: Date,
+  lastModifiedDate: Date,
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  noteStack: { type: mongoose.Schema.Types.ObjectId, ref: 'NoteStack' }
 })
 
 noteSchema.set('toJSON', {
