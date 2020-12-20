@@ -2,6 +2,7 @@ const notesRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
 const Note = require('../models/note')
 const User = require('../models/user')
+const NoteStack = require('../models/notestack')
 
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
@@ -11,19 +12,19 @@ const getTokenFrom = request => {
   return null
 }
 
-notesRouter.get('/get-users-notes/:id', async (request, response) => {
+notesRouter.get('/get-users-notes/:username', async (request, response) => {
   const token = getTokenFrom(request)
   const decodedToken = jwt.verify(token, process.env.SECRET)
-
+  console.log(decodedToken)
   if (!token || !decodedToken.id) {
     return response.status(401).json({ error: 'token missing or invalid' });
   }
 
   if (
-    decodedToken.id.toString() === request.params.id.toString() ||
+    decodedToken.username.toString() === request.params.username.toString() ||
     decodedToken.admin === true
   ) {
-    const notes = await Note.find({ user: request.params.id })
+    const notes = await Note.find({ username: request.params.username })
       .populate('user', { username: 1, name: 1 })
       .populate('noteStack', { title: 1 });
     response.json(notes.reverse().map(note => note.toJSON));
@@ -39,8 +40,9 @@ notesRouter.put('/:id', async (request, response, next) => {
     return response.status(401).json({ error: 'token missing or invalid' });
   }
   
-  const note = await NoteStack.findById(request.params.id)
-  if (note) {
+  const foundNoteStack = await NoteStack.findById(request.params.id)
+  let noteStack = 'default'
+  if (foundNoteStack) {
     response.json(note.toJSON())
   } else {
     response.status(404).end()
@@ -69,10 +71,13 @@ notesRouter.get('/:id', async (request, response) => {
   }
 
   const note = await Note.findById(request.params.id)
-  if (note) {
-    response.json(note.toJSON())
-  } else {
-    response.status(404).end()
+
+  if (decodedToken.id.toString() === note.user.toString() || decodedToken.admin === true) {
+    if (note) {
+      response.json(note.toJSON())
+    } else {
+      response.status(404).end()
+    }
   }
 })
 
