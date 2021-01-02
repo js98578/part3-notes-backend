@@ -37,8 +37,7 @@ notesRouter.get('/get-users-notes/:username', async (request, response) => {
     const notes = await Note.find({ user: user._id })
       .populate('user', { username: 1, name: 1 })
       .populate('noteStack', { title: 1 });
-    console.log(notes);
-    response.json(notes);
+    response.json(notes.reverse().map(note => note.toJSON()))
   }
 });
 
