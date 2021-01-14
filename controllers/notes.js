@@ -4,6 +4,8 @@ const Note = require('../models/note');
 const User = require('../models/user');
 const NoteStack = require('../models/notestack');
 const ObjectId = require('mongoose').Types.ObjectId;
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const getTokenFrom = (request) => {
   const authorization = request.get('authorization');
